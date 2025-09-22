@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OS95-R - Project Obsidian</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #008080;
+            overflow: hidden;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            position: relative;
+        }
+
+
+    .error-popup {
+        width: 300px;
+        background: #d4d0c8;
+        color: black;
+        padding: 15px;
+        text-align: left;
+        position: absolute;
+        left: 50%;
+        top: 80%;
+        transform: translate(-50%, -50%);
+        border: 2px solid black;
+        box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+        font-family: "MS Sans Serif", Tahoma, sans-serif;
+        display: none;
+        z-index: 9999;
+    }
+
+    .error-title-bar {
+        background: navy;
+        color: white;
+        font-weight: bold;
+        padding: 4px 8px;
+        font-size: 14px;
+    }
+
+    .error-content {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+    }
+
+    .error-content img {
+        width: 32px;
+        height: 32px;
+        margin-right: 10px;
+    }
+
+    .error-buttons {
+        text-align: right;
+        padding: 5px;
+    }
+
+    .error-buttons button {
+        background-color: #d4d0c8;
+        border: 2px solid gray;
+        padding: 5px 15px;
+        margin-left: 5px;
+        cursor: pointer;
+    }
+
+    .error-buttons button:hover {
+        background-color: #c0c0c0;
+    }
+            
+            
+        .loading-popup {
+            width: 300px;
+            background: #d4d0c8;
+            color: black;
+            padding: 15px;
+            text-align: center;
+            position: absolute;
+            left: 50%;
+            top: 80%;
+            transform: translate(-50%, -50%);
+            border: 2px solid black;
+            box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+            font-family: "MS Sans Serif", Tahoma, sans-serif;
+            display: none;
+            z-index: 9999;
+        }
+
+        .loading-popup h3 {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .loading-popup p {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            height: 20px;
+            background: white;
+            border: 1px inset gray;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #000080;
+            transition: width 3s linear;
+        }
+
+        /* Desktop Icons Container */
+        .desktop {
+            width: 800;
+            height: 800;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 10px;
+            position: relative;
+        }
+
+        /* Desktop Icons */
+        .icon {
+    width: 80px; /* Ensure all icons have the same width */
+    height: 80px; /* Ensure all icons have the same height */
+    text-align: center;
+    margin: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+        .icon:hover {
+            transform: scale(1.1);
+        }
+
+        .icon img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain; /* Prevents stretching */
+}
+
+.icon span {
+    display: block;
+    color: white;
+    font-size: 12px;
+    text-shadow: 1px 1px 2px black;
+    white-space: nowrap; /* Prevents multi-line text */
+}
+
+/* Vault Icon (Adjusted for better positioning) */
+.icon-vault {
+    position: absolute;
+    bottom: 10px; /* Lowered closer to the taskbar */
+    right: 20px; /* Moved slightly more to the right */
+    top: 130%  
+}
+
+        /* Hover Popup */
+        .context-menu {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
+    font-size: 14px;
+    white-space: nowrap;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    pointer-events: none; /* Prevents collision */
+}
+
+        /* Startup Popup */
+    /* Fade-in Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    }
+
+    .popup {
+        background: #d4d0c8;
+        color: black;
+        padding: 15px;
+        text-align: center;
+        position: absolute;
+        left: 50%;
+        top: 80%;
+        transform: translate(-50%, -50%);
+        border: 2px solid black;
+        box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+        font-family: "MS Sans Serif", Tahoma, sans-serif;
+        display: none;
+        z-index: 9999;
+        transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    }
+
+        .popup-content {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        }
+
+        .popup-title-bar {
+        align-items: left;
+        background: navy;
+        color: white;
+        font-weight: bold;
+        padding: 4px 8px;
+        font-size: 14px;
+    }
+
+        .popup button {
+        background-color: #d4d0c8;
+        border: 2px solid gray;
+        padding: 5px 15px;
+        margin-left: 5px;
+        cursor: pointer;
+        text-align: center;
+        }
+
+        .popup button:hover {
+            background-color: #c0c0c0;
+        }
+
+        /* Taskbar */
+        .taskbar {
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to bottom, #d4d0c8, #a6a39b);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Start Button */
+        .start-button {
+            width: 90px;
+            height: 30px;
+            background: linear-gradient(to bottom, #008000, #006400);
+            color: white;
+            border: 2px solid #004d00;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-left: 5px;
+            border-radius: 5px;
+            text-shadow: 1px 1px 2px black;
+            transition: transform 0.2s ease;
+        }
+
+        .start-button:hover {
+            transform: scale(1.1);
+            background: linear-gradient(to bottom, #00a000, #007000);
+        }
+
+        .start-button img {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+
+        /* Bottom-Right Time Display */
+        .taskbar-right {
+            color: black;
+            font-size: 14px;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        /* Bottom-Left Date Display */
+        .taskbar-left {
+            color: black;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <audio id="warning" src="desktop/warningsound.mp3"></audio>
+
+<!-- Startup Popup -->
+<div class="popup" id="startupPopup">
+    <div class="popup-title-bar">Welcome!</div>
+    <div class="popup-content">
+    <p>Welcome to OS95-R!</p>
+    </div>
+    <button onclick="closePopup()">OK</button>
+    <button onclick="nocancel()">Cancel</button>
+</div>
+
+<audio id="startupSound" src="desktop/startupsound.mp3"></audio>
+
+    <!-- Windows 95 Loading Popup -->
+    <div class="loading-popup" id="loadingPopup">
+        <h3>Windows is updating...</h3>
+        <p>Please wait while Windows refreshes.</p>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <!-- Windows 95 Error Popup -->
+<div class="error-popup" id="errorPopup">
+    <div class="error-title-bar">Error</div>
+    <div class="error-content">
+        <img src="alltheicons/redx.png" alt="Error Icon">
+        <p>Too Late For That Now.</p>
+    </div>
+    <div class="error-buttons">
+        <button onclick="closeErrorPopup()">OK</button>
+    </div>
+</div>
+
+
+    <!-- Desktop Icons -->
+    <div class="desktop">
+        <div class="icon" data-desc="Open 'My Computer'" onclick="openMyComputer()" onmouseenter="delayedContextMenu(event)" onmouseleave="hideContextMenu()">
+            <img src="alltheicons/mypcicon.png" alt="My Computer">
+            <span>My Computer</span>
+        </div>
+
+        <div class="icon" data-desc="Open 'Recycle Bin'" onclick="openTrashCan()" onmouseenter="delayedContextMenu(event)" onmouseleave="hideContextMenu()">
+            <img src="alltheicons/trashcanicon.png" alt="Recycle Bin">
+            <span>Recycle Bin</span>
+        </div>
+
+        <div class="icon" data-desc="Run Internet Explorer" onclick="openInternetExplorer()" onmouseenter="delayedContextMenu(event)" onmouseleave="hideContextMenu()">
+            <img src="alltheicons/internetexplorericon.png" alt="Internet Explorer">
+            <span>Internet Explorer</span>
+        </div>
+
+        <div class="icon" data-desc="View Change Logs" onclick="openChangeLogs()" onmouseenter="delayedContextMenu(event)" onmouseleave="hideContextMenu()">
+            <img src="alltheicons/changelogsicon.png" alt="Change Logs">
+            <span>Change Logs</span>
+        </div>
+
+        <div class="icon icon-vault" data-desc="Vault." onclick="openVault()" onmouseenter="delayedContextMenu(event)" onmouseleave="hideContextMenu()">
+            <img src="alltheicons/vaulticon.png" alt="Vault">
+            <span>Vault</span>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <div class="start-button" onclick="startLoading()">
+            <img src="alltheicons/starticon.png" alt="Start">
+            Start
+        </div>
+        <div class="taskbar-left" id="dateDisplay"></div>
+        <div class="taskbar-right" id="timeDisplay"></div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu"></div>
+
+    <script>
+        let timeoutId;
+
+        function closePopup() {
+            startupSound.play(); // Play sound
+            document.getElementById("startupPopup").style.display = "none";
+        }
+
+        function showStartupPopup() {
+        const popup = document.getElementById("startupPopup");
+        const startupSound = document.getElementById("startupSound");
+
+        popup.style.display = "block";
+        popup.style.animation = "fadeIn 0.5s ease-out forwards";
+    }
+
+    window.onload = function () {
+        setTimeout(showStartupPopup, 500); // Small delay to simulate loading effect
+    };
+
+        function openInternetExplorer() {
+    const width = 900;
+    const height = 650;
+
+    // Calculate the center of the screen
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
+
+    window.open("desktop/internetexplorer.html", "_blank", `width=${width},height=${height},left=${left},top=${top}`);
+}
+
+
+
+        function openMyComputer() {
+    // Get screen width and height
+    let screenWidth = window.screen.width;
+    let screenHeight = window.screen.height;
+
+    // Set window dimensions
+    let winWidth = 800;
+    let winHeight = 500;
+
+    // Calculate center position
+    let left = (screenWidth - winWidth) / 2;
+    let top = (screenHeight - winHeight) / 2;
+
+    // Open the new window centered
+    window.open("desktop/mypc.html", "_blank", `width=${winWidth},height=${winHeight},left=${left},top=${top}`);
+}
+
+    function openChangeLogs() {
+        const width = 600;
+        const height = 450;
+        const left = (window.screen.width - width) / 2;
+        const top = (window.screen.height - height) / 2;
+        
+        window.open("desktop/changelogs.html", "_blank", `width=${width},height=${height},left=${left},top=${top}`);
+    }
+
+        function openTrashCan() {
+        const widtha = 600;
+        const heighta = 400;
+        const lefta = (window.screen.width - widtha) / 2;
+        const topa = (window.screen.height - heighta) / 2;
+        
+        window.open("desktop/trashcan.html", "_blank", `width=${widtha},height=${heighta},left=${lefta},top=${topa}`);
+        }
+
+        function openVault() {
+            alert("Even More OOOO!!!")
+        }
+
+        function nocancel() {
+            document.getElementById("warning").play();
+            document.getElementById("errorPopup").style.display = "block";
+        }
+
+        function closeErrorPopup() {
+        document.getElementById("errorPopup").style.display = "none";
+    }
+
+
+        function showContextMenu(event) {
+    const menu = document.getElementById("contextMenu");
+    menu.innerText = event.target.closest(".icon").getAttribute("data-desc");
+
+    // Position slightly offset from the cursor
+    menu.style.left = (event.pageX + 4) + "px";
+    menu.style.top = (event.pageY + 4) + "px";
+
+    menu.style.display = "block";
+    menu.style.opacity = "1";
+}
+
+        function hideContextMenu() {
+            clearTimeout(timeoutId)
+            const menu = document.getElementById("contextMenu");
+            menu.style.opacity = "0";
+            setTimeout(() => menu.style.display = "none", 200);
+        }
+
+        function delayedContextMenu(event) {
+            // Clear any existing timeout
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            // Set a new timeout for 1.5 seconds
+            timeoutId = setTimeout(() => showContextMenu(event), 1500);
+        }
+
+        function startLoading() {
+            // Show loading popup
+            const popup = document.getElementById("loadingPopup");
+            const progressBar = document.getElementById("progressBar");
+
+            popup.style.display = "block";
+            progressBar.style.width = "0%";
+
+            // Play loading sound
+            document.getElementById("warning").play();
+
+            // Start progress bar animation
+            setTimeout(() => {
+                progressBar.style.width = "100%";
+            }, 100);
+
+            // Refresh the page after 3 seconds
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        }
+
+
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById("dateDisplay").innerText = now.toDateString();
+            document.getElementById("timeDisplay").innerText = now.toLocaleTimeString();
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+    </script>
+
+</body>
+</html>
